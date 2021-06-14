@@ -1,24 +1,51 @@
-# Lumen PHP Framework
+# Measurement API
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://img.shields.io/packagist/dt/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://img.shields.io/packagist/v/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://img.shields.io/packagist/l/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
+This API was built to be both scalable and future proof. I've also made use of Lumen as it's lightweight enough to avoid the app from being bloated while having just the right amount of functionalities without having to reinvent the wheels. Although right now it only calculates the total of 2 distances, the architecture makes use of design patterns that allows for additional functionalities to be easily added. It makes as much as possible SOLID and DRY principles in order to minimise duplication of code. 
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+However this might open up the possibility of over-engineering, for example the DistanceClass. Instead of just implementing the interface directly I extended the MeasurementAbstractClass which does the implementation. My thought process for this is so that if there was a need to create a AreaClass or other types of measurements, it could extend the same MeasurementAbstractClass conversion trait or any other traits that the abstract class eventually uses.
 
-## Official Documentation
+I also approached it making sure there was a decent amount of unit test coverage. At this point of time though I have only included unit test for the class and not for API responses. Testing the endpoints would definitely something that needs to be added later on.
 
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
+To run the application, clone the repo to the server root and run `composer install`. The web service should be accesible from the `/v1/distance/total` endpoint.
 
-## Contributing
+A sample JSON request payload would be something like this:
 
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```json
+{
+    "outputType": "meter",
+    "data": 
+        [
+            {
+                "unit": 3,
+                "uom": "yard"
+            },
+            {
+                "unit": 5,
+                "uom": "meter"
+            }
+        ]
+}
+```
 
-## Security Vulnerabilities
+The successful response payload will look like the following
 
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+```json
+{
+    "status": 200,
+    "data": {
+        "uom": "meter",
+        "total": 7.7432
+    }
+}
+```
 
-## License
+Any errors from the api will be returned with the following data structure
 
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```json
+{
+    "status": 400,
+    "data": {
+        "error": "output type needs to be either in yard or in meter"
+    }
+}
+```
