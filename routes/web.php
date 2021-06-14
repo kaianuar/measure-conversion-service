@@ -12,3 +12,9 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
+
+$router->group(['prefix' => 'v1'], function () use ($router) {
+    $router->group(['prefix' => 'distance'], function () use ($router) {
+        $router->post('total', 'DistanceController@getTotal');
+    });
+});
