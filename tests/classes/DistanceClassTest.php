@@ -22,20 +22,17 @@ class DistanceClassTest extends TestCase
         $total = $measurement->total($outputType, $measurementData);
 
         $this->assertEquals($total, 7.7432);
+
+        return $measurementData;
     }
 
-    public function testYardConvertedToMeter()
+    /**
+     * @depends testMeterConvertedToYard
+     */
+    public function testYardConvertedToMeter(array $data)
     {
-        $measurementData = [
-            0 => [
-                'unit' => 5,
-                'uom' => 'meter'
-            ],
-            1 => [
-                'unit' => 3,
-                'uom' => 'yard',
-            ]
-        ];
+
+        $measurementData = $data;
         $outputType = 'yard';
         
         $measurement = new Distance();
