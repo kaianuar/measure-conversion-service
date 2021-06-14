@@ -22,26 +22,36 @@ class DistanceController extends MeasurementAbstractController
 
     public function getTotal(Request $request)
     {
-        $error = $this->validateRequest($request->all());
+        try {
+            $error = $this->validateRequest($request->all());
 
-        if ($error) {
+            if ($error) {
+                $data = [
+                    'error' => $error
+                ];
+        
+                return self::returnJSON($data, 400);
+            }
+    
+            $outputType = $request->input('outputType');
+            $measurementData = $request->input('data');
+            $total = $this->measurement->total($outputType, $measurementData);
+    
             $data = [
-                'error' => $error
+                'uom' => $outputType,
+                'total' => $total,
             ];
     
-            return self::returnJSON($data, 400);
+            return self::returnJSON($data);
+        } catch (\Throwable $th) {
+            // Catch any other exceptions
+            $data = [
+                'error' => 'There was a server error while processing the request'
+            ];
+
+            return self::returnJSON($data, 500);
         }
 
-        $outputType = $request->input('outputType');
-        $measurementData = $request->input('data');
-        $total = $this->measurement->total($outputType, $measurementData);
-
-        $data = [
-            'uom' => $outputType,
-            'total' => $total,
-        ];
-
-        return self::returnJSON($data);
     }
 
     protected function validateRequest(array $request)
