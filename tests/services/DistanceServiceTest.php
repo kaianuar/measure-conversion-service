@@ -1,8 +1,8 @@
 <?php
 
-use App\Classes\DistanceClass as Distance;
+use App\Services\DistanceService as Distance;
 
-class DistanceClassTest extends TestCase
+class DistanceServiceTest extends TestCase
 {
     public function testMeterConvertedToYard()
     {
@@ -19,9 +19,11 @@ class DistanceClassTest extends TestCase
         $outputType = 'meter';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
 
         $this->assertEquals($total, 7.7432);
+        $this->assertEquals($statusCode, 200);
+        $this->assertEmpty($errorType);
 
         return $measurementData;
     }
@@ -36,9 +38,11 @@ class DistanceClassTest extends TestCase
         $outputType = 'yard';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
 
         $this->assertEquals($total, 8.46805);
+        $this->assertEquals($statusCode, 200);
+        $this->assertEmpty($errorType);
     }
 
     /**
@@ -46,17 +50,19 @@ class DistanceClassTest extends TestCase
      */
     public function testExceptionIfInvalidOutputType(array $data)
     {
-        $this->expectException(InvalidArgumentException::class);
         $measurementData = $data;
         $outputType = 'inches';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
+
+        $this->assertEquals($statusCode, 400);
+        $this->assertEquals($errorType, 'The outputType needs to be either in yard or in meter');
+        $this->assertNull($total);
     }
 
     public function testExceptionIfMeasurementDataIsLessThanTwo()
     {
-        $this->expectException(InvalidArgumentException::class);
         $measurementData = [
             0 => [
                 'unit' => 5,
@@ -66,12 +72,15 @@ class DistanceClassTest extends TestCase
         $outputType = 'yard';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
+
+        $this->assertEquals($statusCode, 400);
+        $this->assertEquals($errorType, '2 units of measurements needed to perform the calculation.');
+        $this->assertNull($total);
     }
 
     public function testExceptionIfMeasurementDataHasInvalidUOM()
     {
-        $this->expectException(InvalidArgumentException::class);
         $measurementData = [
             0 => [
                 'unit' => 5,
@@ -85,12 +94,15 @@ class DistanceClassTest extends TestCase
         $outputType = 'yard';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
+
+        $this->assertEquals($statusCode, 400);
+        $this->assertEquals($errorType, 'The uom field needs to be either in yard or in meter');
+        $this->assertNull($total);
     }
 
     public function testExceptionIfMeasurementUnitIsNotAvalidNumber()
     {
-        $this->expectException(InvalidArgumentException::class);
         $measurementData = [
             0 => [
                 'unit' => "abc",
@@ -104,6 +116,10 @@ class DistanceClassTest extends TestCase
         $outputType = 'yard';
         
         $measurement = new Distance();
-        $total = $measurement->total($outputType, $measurementData);
+        [$statusCode, $total, $errorType] = $measurement->total($outputType, $measurementData);
+
+        $this->assertEquals($statusCode, 400);
+        $this->assertEquals($errorType, 'The unit field should be a numerical value');
+        $this->assertNull($total);
     }
 }

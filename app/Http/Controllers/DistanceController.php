@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Classes\DistanceClass As Distance;
+use App\Services\DistanceService As Distance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -35,7 +35,7 @@ class DistanceController extends MeasurementAbstractController
     
             $outputType = $request->input('outputType');
             $measurementData = $request->input('data');
-            $total = $this->measurement->total($outputType, $measurementData);
+            [$statusCode, $total] = $this->measurement->total($outputType, $measurementData);
     
             $data = [
                 'uom' => $outputType,
@@ -80,10 +80,10 @@ class DistanceController extends MeasurementAbstractController
                 ],
             ],
             [
-                'outputType.in' => ':attribute needs to be either in yard or in meter',
-                'data.size' => 'There must be exactly 2 units to calculate the total distance',
-                'data.*.unit.numeric' => 'The unit field should be a numerical value',
-                'data.*.uom.in' => 'The uom field needs to be either in yard or in meter'
+                'outputType.in' => trans('messages.INVALID_OUTPUTTYPE'),
+                'data.size' => trans('messages.TWO_UNITS_MIN'),
+                'data.*.unit.numeric' => trans('messages.INVALID_UNIT'),
+                'data.*.uom.in' => trans('messages.INVALID_UOM')
             ]
         );
 
